@@ -1,15 +1,19 @@
-import { Message, MessageReaction, PartialUser, User } from "discord.js";
+import {
+  Message,
+  MessageReaction,
+  PartialMessage,
+  PartialMessageReaction,
+  PartialUser,
+  User,
+} from "discord.js";
 import Tools from "../common/tools";
 import { GroupManagerTools } from "../programs";
 import { hasRole } from "../common/moderator";
 import prisma from "../prisma";
-import {
-  isColorSelectionMessage,
-  memberHasNitroColor,
-} from "../programs/nitro-colors";
+import { isColorSelectionMessage } from "../programs/nitro-colors";
 
 const reactionAdd = async (
-  messageReaction: MessageReaction,
+  messageReaction: MessageReaction | PartialMessageReaction,
   user: User | PartialUser
 ) => {
   await handleChannelToggleReaction(
@@ -21,7 +25,7 @@ const reactionAdd = async (
 };
 
 const addRolesFromReaction = async (
-  messageReaction: MessageReaction,
+  messageReaction: MessageReaction | PartialMessageReaction,
   user: User | PartialUser
 ) => {
   const {
@@ -38,7 +42,7 @@ const addRolesFromReaction = async (
   });
 
   const guildMember =
-    guild.member(user.id) ?? (await guild.members.fetch(user.id));
+    guild.members.resolve(user.id) ?? (await guild.members.fetch(user.id));
   //Since most of the bot isn't refactored yet, this must stay for the old and new event do not collide together. Color Roles are handled in Nitro-colors.ts
   if (isColorSelectionMessage(messageId)) return;
 
@@ -49,7 +53,7 @@ const addRolesFromReaction = async (
 };
 
 const handleChannelToggleReaction = async (
-  message: Message,
+  message: Message | PartialMessage,
   emoji: string,
   user: User | PartialUser
 ) => {
@@ -64,7 +68,7 @@ const handleChannelToggleReaction = async (
     return;
   }
 
-  const member = guild.member(user.id);
+  const member = guild.members.resolve(user.id);
   // Catch users who are timeouted and deny their attempts at accessing other channels
   if (hasRole(member, "Time Out")) {
     const reaction = message.reactions.cache.find(

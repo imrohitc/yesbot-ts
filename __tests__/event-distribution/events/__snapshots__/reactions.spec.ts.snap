@@ -133,7 +133,7 @@ exports[`Reactions should extract reaction from direct message 1`] = `
 Object {
   "handlerKeys": Array [
     "channel-id",
-    undefined,
+    null,
   ],
   "isDirectMessage": true,
   "member": null,
@@ -144,18 +144,18 @@ exports[`Reactions should extract reaction from public channel 1`] = `
 Object {
   "handlerKeys": Array [
     "guild-channel",
-    undefined,
+    null,
   ],
   "isDirectMessage": false,
   "member": Object {
     "deleted": false,
-    "displayName": "user username",
-    "guildID": "guild-id",
-    "joinedTimestamp": null,
-    "lastMessageChannelID": null,
-    "nickname": null,
+    "displayName": "nick",
+    "guildId": "guild-id",
+    "joinedTimestamp": NaN,
+    "nickname": "nick",
+    "pending": false,
     "premiumSinceTimestamp": null,
-    "userID": "222222222222222200",
+    "userId": "222222222222222200",
   },
 }
 `;

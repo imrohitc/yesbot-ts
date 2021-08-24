@@ -149,13 +149,13 @@ Object {
   "isDirectMessage": true,
   "member": Object {
     "deleted": false,
-    "displayName": "user username",
-    "guildID": "guild-id",
-    "joinedTimestamp": null,
-    "lastMessageChannelID": null,
-    "nickname": null,
+    "displayName": "nick",
+    "guildId": "guild-id",
+    "joinedTimestamp": NaN,
+    "nickname": "nick",
+    "pending": false,
     "premiumSinceTimestamp": null,
-    "userID": "222222222222222200",
+    "userId": "222222222222222200",
   },
 }
 `;
@@ -170,13 +170,13 @@ Object {
   "isDirectMessage": false,
   "member": Object {
     "deleted": false,
-    "displayName": "user username",
-    "guildID": "guild-id",
-    "joinedTimestamp": null,
-    "lastMessageChannelID": null,
-    "nickname": null,
+    "displayName": "nick",
+    "guildId": "guild-id",
+    "joinedTimestamp": NaN,
+    "nickname": "nick",
+    "pending": false,
     "premiumSinceTimestamp": null,
-    "userID": "222222222222222200",
+    "userId": "222222222222222200",
   },
 }
 `;

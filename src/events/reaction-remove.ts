@@ -1,9 +1,17 @@
-import { Message, MessageReaction, PartialUser, User } from "discord.js";
+import {
+  GuildChannel,
+  Message,
+  MessageReaction,
+  PartialMessage,
+  PartialMessageReaction,
+  PartialUser,
+  User,
+} from "discord.js";
 import { textLog } from "../common/moderator";
 import prisma from "../prisma";
 
 const reactionRemove = async (
-  messageReaction: MessageReaction,
+  messageReaction: MessageReaction | PartialMessageReaction,
   user: User | PartialUser
 ) => {
   const {
@@ -11,7 +19,7 @@ const reactionRemove = async (
     emoji: { name: emoji },
   } = messageReaction;
 
-  if (channel.type === "dm" || channel.name === "pick-your-color" || user.bot) {
+  if (channel.type === "DM" || channel.name === "pick-your-color" || user.bot) {
     return;
   }
 
@@ -24,7 +32,7 @@ const reactionRemove = async (
   });
 
   reactRoleObjects.forEach((reactionRole) => {
-    const guildMember = guild.member(user.id);
+    const guildMember = guild.members.resolve(user.id);
     const roleToAdd = guild.roles.resolve(reactionRole.roleId);
     guildMember.roles.remove(roleToAdd);
   });
@@ -37,7 +45,7 @@ const reactionRemove = async (
 };
 
 const handleChannelToggleReaction = async (
-  message: Message,
+  message: Message | PartialMessage,
   user: User | PartialUser,
   emoji: string
 ) => {
@@ -61,7 +69,9 @@ const handleChannelToggleReaction = async (
     );
     return;
   }
-  await channel.permissionOverwrites.get(user.id)?.delete();
+  await (channel as GuildChannel).permissionOverwrites
+    .resolve(user.id)
+    ?.delete();
 };
 
 export default reactionRemove;

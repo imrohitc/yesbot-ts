@@ -6,11 +6,10 @@ import {
   HandlerFunctionFor,
 } from "../types/base";
 import {
-  DMChannel,
   MessageReaction,
-  NewsChannel,
+  PartialMessageReaction,
   PartialUser,
-  TextChannel,
+  TextBasedChannels,
   User,
 } from "discord.js";
 import { addToTree } from "../helper";
@@ -24,7 +23,7 @@ export type ReactionHandlerFunction<T extends DiscordEvent> =
   HandlerFunctionFor<
     T,
     DiscordEvent.REACTION_ADD | DiscordEvent.REACTION_REMOVE,
-    [MessageReaction, User | PartialUser]
+    [MessageReaction | PartialMessageReaction, User | PartialUser]
   >;
 
 export const addReactionHandler: AddEventHandlerFunction<ReactionEventHandlerOptions> =
@@ -42,18 +41,17 @@ export const addReactionHandler: AddEventHandlerFunction<ReactionEventHandlerOpt
 export const extractReactionInfo: ExtractInfoForEventFunction<
   DiscordEvent.REACTION_ADD | DiscordEvent.REACTION_REMOVE
 > = (reaction, user) => {
-  const getChannelIdentifier = (
-    channel: TextChannel | DMChannel | NewsChannel
-  ) => (channel.type === "dm" ? channel.id : channel.name);
+  const getChannelIdentifier = (channel: TextBasedChannels) =>
+    channel.type === "DM" ? channel.id : channel.name;
 
   const channel = reaction.message.channel;
-  const guild = channel.type === "dm" ? null : channel.guild;
-  const member = guild?.member(user.id) ?? null;
+  const guild = channel.type === "DM" ? null : channel.guild;
+  const member = guild?.members.resolve(user.id) ?? null;
 
   const channelIdentifier = getChannelIdentifier(channel);
   return {
     handlerKeys: [channelIdentifier, reaction.emoji.name],
     member,
-    isDirectMessage: reaction.message.channel.type === "dm",
+    isDirectMessage: reaction.message.channel.type === "DM",
   };
 };
