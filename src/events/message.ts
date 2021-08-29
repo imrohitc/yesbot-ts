@@ -6,7 +6,6 @@ import {
   MapTools,
   ReactRole,
   Ticket,
-  VoiceOnDemand,
 } from "../programs";
 import {
   dailyChallenge,
@@ -51,7 +50,6 @@ const routeMessage = async (message: Message) => {
       )
         await GroupManager(message, true);
 
-      if (firstWord === "!voice") await VoiceOnDemand(message);
       if (firstWord === "!map") await MapTools.map(message);
       if (firstWord === "!mapadd") await MapTools.mapAdd(message);
       break;

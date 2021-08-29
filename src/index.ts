@@ -16,7 +16,6 @@ import {
   reactionAdd,
   reactionRemove,
   ready,
-  voiceStateUpdate,
 } from "./events";
 import distribution, { DiscordEvent } from "./event-distribution";
 
@@ -89,7 +88,6 @@ bot.on(
       oldState,
       newState
     );
-    await voiceStateUpdate(oldState, newState);
   }
 );
 //! ================= /EVENT HANDLERS ===================
