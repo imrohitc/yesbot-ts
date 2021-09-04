@@ -7,11 +7,6 @@ import {
   ReactRole,
   Ticket,
 } from "../programs";
-import {
-  dailyChallenge,
-  postDailyMessage,
-  saveToDb,
-} from "../programs/daily-challenge";
 
 const message = async (msg: Message) => {
   if (msg.channel.type === "dm" && !msg.author.bot) {
@@ -28,9 +23,6 @@ const routeMessage = async (message: Message) => {
   const restOfMessage = words.slice(1).join(" ");
 
   switch (channel.name) {
-    case "daily-challenge":
-      if (firstWord === "!challenge") await dailyChallenge(message);
-      break;
     case "permanent-testing":
       if (firstWord === "!export") await ExportManager(message);
       if (
@@ -38,11 +30,6 @@ const routeMessage = async (message: Message) => {
         !message.content.toLowerCase().startsWith("!group toggle")
       )
         await GroupManager(message, true);
-      if (firstWord === "!addChallenge")
-        await saveToDb("daily-challenge", restOfMessage, message);
-      if (firstWord === "!todayChallenge")
-        await postDailyMessage(message.client, message);
-      break;
     case "bot-commands":
       if (
         firstWord === "!group" &&

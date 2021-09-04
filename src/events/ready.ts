@@ -1,6 +1,6 @@
 import { Client, Guild, Message, TextChannel } from "discord.js";
 import { createYesBotLogger } from "../log";
-import { DailyChallenge, Game } from "../programs";
+import { Game } from "../programs";
 
 const developerChannelName = "bot-development";
 
@@ -16,7 +16,6 @@ const ready = async (bot: Client) => {
   logger.debug("Finding guild based on GUILD_ID", { GUILD_ID: guildId });
   const guild = bot.guilds.resolve(guildId);
   if (process.env.OUTPUT_CHANNEL_ID) {
-    await DailyChallenge.initialize(bot);
     Game.initGameHub(guild);
 
     const messages = await sendOnlineMessage(guild);
