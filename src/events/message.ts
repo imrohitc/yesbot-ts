@@ -1,7 +1,6 @@
-import { GuildChannel, Message, TextChannel } from "discord.js";
+import { Message, TextChannel } from "discord.js";
 import {
   ExportManager,
-  Game,
   GroupManager,
   MapTools,
   VoiceOnDemand,
@@ -44,18 +43,6 @@ const routeMessage = async (message: Message) => {
     case "feature-requests":
       message.react("👍").then(() => message.react("👎"));
       break;
-
-    case "bot-games":
-      if (firstWord === "!game") await Game.showGameEmbed(message);
-      break;
-  }
-
-  const parentChannel = (message.channel as GuildChannel).parent;
-  if (
-    parentChannel &&
-    parentChannel.name.toLowerCase().endsWith("entertainment")
-  ) {
-    Game.handleGameInput(message);
   }
 
   if (firstWord === "!goodbye") {
