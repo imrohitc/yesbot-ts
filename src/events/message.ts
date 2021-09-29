@@ -2,7 +2,6 @@ import { GuildChannel, Message, TextChannel } from "discord.js";
 import {
   ExportManager,
   Game,
-  GroupManager,
   MapTools,
   VoiceOnDemand,
 } from "../programs";
@@ -23,18 +22,8 @@ const routeMessage = async (message: Message) => {
 
   switch (channel.name) {
     case "permanent-testing":
-      if (firstWord === "!export") await ExportManager(message);
-      if (
-        firstWord === "!group" &&
-        !message.content.toLowerCase().startsWith("!group toggle")
-      )
-        await GroupManager(message, true);
+      if (firstWord === "!export") await ExportManager(message);;
     case "bot-commands":
-      if (
-        firstWord === "!group" &&
-        !message.content.toLowerCase().startsWith("!group toggle")
-      )
-        await GroupManager(message, true);
 
       if (firstWord === "!voice") await VoiceOnDemand(message);
       if (firstWord === "!map") await MapTools.map(message);
@@ -64,11 +53,6 @@ const routeMessage = async (message: Message) => {
     );
     await message.member.roles.remove(guildRole);
   }
-
-  if (message.content.toLowerCase().startsWith("!group toggle"))
-    await GroupManager(message, true);
-
-  if (words.includes("@group")) await GroupManager(message, false);
 };
 
 export default message;

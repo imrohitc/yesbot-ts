@@ -1,68 +1,25 @@
-import {
-  Channel,
-  Message,
-  TextChannel,
-} from "discord.js";
+import { Channel, Message, TextChannel } from "discord.js";
 import Tools from "../../common/tools";
 import { isAuthorModerator } from "../../common/moderator";
-import {
-  GroupPingSetting,
-  UserGroup,
-} from "@yes-theory-fam/database/client";
+import { GroupPingSetting, UserGroup } from "@yes-theory-fam/database/client";
 import { ChatNames } from "../../collections/chat-names";
 import prisma from "../../prisma";
+import { timeRemainingForDeadchat } from "./common";
 import {
-  logger,
-} from "./common";
+  Command,
+  CommandHandler,
+  DiscordEvent,
+} from "../../event-distribution";
 
-const groupManager = async (message: Message, isConfig: boolean) => {
-  const content = message.content;
+@Command({
+  event: DiscordEvent.MESSAGE,
+  trigger: "@group",
+  description: "This handler is to ping all users in the group",
+})
+class PingGroup implements CommandHandler<DiscordEvent.MESSAGE> {
+  async handle(message: Message): Promise<void> {
+    const content = message.content;
 
-  if (isConfig) {
-    const words = Tools.stringToWords(content);
-    words.shift();
-    const [action, requestName, ...rest] = words;
-    const description = rest.join(" ");
-
-    if (
-      !action ||
-      ![
-        "toggle",
-        "changeCooldown",
-        "changeDeadtime",
-        "changeGroupPingSettings",
-      ].includes(action)
-    ) {
-      const helpMessage = `Incorrect syntax, please use the following: \`!group join|leave|create|search|delete|update|changeCooldown|changeDeadtime\`. If you need additional help, react with 🛠️ below to tag a ${process.env.ENGINEER_ROLE_NAME}`;
-      await message.reply(helpMessage);
-      return;
-    }
-
-    const user = message.member;
-    const moderator = isAuthorModerator(message);
-
-    switch (action) {
-
-      case "changeGroupPingSettings": {
-        moderator
-          ? await changeGroupPingSettings(message, requestName, description)
-          : await Tools.handleUserError(
-              message,
-              "You do not have permissions to use this command."
-            );
-        break;
-      }
-
-      case "changeCooldown": {
-        moderator
-          ? await changeCooldown(message, requestName, description)
-          : await Tools.handleUserError(
-              message,
-              "You do not have permission to use this command."
-            );
-      }
-    }
-  } else {
     if (!isChannelAllowed(message.channel)) {
       return;
     }
@@ -157,85 +114,7 @@ const groupManager = async (message: Message, isConfig: boolean) => {
       data: { lastUsed: new Date() },
     });
   }
-};
-
-const changeGroupPingSettings = async (
-  message: Message,
-  requestedGroupName: string,
-  option: string
-) => {
-  const setting = option.toUpperCase();
-
-  if (
-    setting !== GroupPingSetting.MODERATOR &&
-    setting !== GroupPingSetting.MEMBER &&
-    setting !== GroupPingSetting.BOT &&
-    setting !== GroupPingSetting.OFF
-  ) {
-    await Tools.handleUserError(
-      message,
-      "Please write a valid setting for the group ping! The options are `moderator`, `member`, `bot` or `off`."
-    );
-    return;
-  }
-  const group = await prisma.userGroup.findFirst({
-    where: {
-      name: {
-        equals: requestedGroupName,
-        mode: "insensitive",
-      },
-    },
-  });
-
-  if (!group) {
-    await message.reply("That group doesn't exist!");
-    return;
-  }
-
-  try {
-    await prisma.userGroup.update({
-      where: { id: group.id },
-      data: { groupPingSetting: GroupPingSetting[setting] },
-    });
-  } catch (error) {
-    logger.error("Failed to update database group ping settings," + error);
-    await message.react("👎");
-    return;
-  }
-
-  await message.react("👍");
-};
-
-const changeCooldown = async (
-  message: Message,
-  requestedGroupName: string,
-  newCooldown: string
-) => {
-  const cooldownNumber = Number(newCooldown);
-  if (isNaN(cooldownNumber)) {
-    await Tools.handleUserError(
-      message,
-      "Please write a number for the new cooldown! It will be interpreted as minutes before the group can be pinged again."
-    );
-    return;
-  }
-
-  const group = await prisma.userGroup.findFirst({
-    where: {
-      name: {
-        equals: requestedGroupName,
-        mode: "insensitive",
-      },
-    },
-  });
-
-  await prisma.userGroup.update({
-    where: { id: group.id },
-    data: { cooldown: cooldownNumber },
-  });
-
-  await message.react("👍");
-};
+}
 
 const isChannelAllowed = (channel: Channel): boolean => {
   const isTextChannel = (channel: Channel): channel is TextChannel =>
@@ -265,20 +144,3 @@ const isChannelAllowed = (channel: Channel): boolean => {
 
   return allowedChannels.includes(channel.name);
 };
-
-const timeRemainingForDeadchat = async (message: Message, group: UserGroup) => {
-  const lastMessages = (
-    await message.channel.messages.fetch({ limit: 2 })
-  ).array();
-
-  if (lastMessages.length < 2) {
-    return 0;
-  }
-
-  const timeDifference =
-    (Date.now() - lastMessages[1].createdTimestamp) / 1000 / 60;
-
-  return group.deadtime - Math.round(timeDifference);
-};
-
-export default groupManager;
